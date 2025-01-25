@@ -23,7 +23,7 @@ fn concat(a: usize, b: usize) -> usize {
     a * n + b
 }
 
-fn test(trial: &Vec<usize>, primes: &Vec<bool>) -> bool {
+fn test_trial_vector(trial: &[usize], primes: &Vec<bool>) -> bool {
     for i in trial {
         for j in trial {
             if i == j {
@@ -39,46 +39,56 @@ fn test(trial: &Vec<usize>, primes: &Vec<bool>) -> bool {
     true
 }
 
-fn explore(trial: &Vec<usize>, primes: &Vec<bool>) {
+pub fn clone_with_extra<T: Clone>(x: &[T], y: &T) -> Vec<T> {
+    x.iter().chain([y]).cloned().collect()
+}
+
+fn explore(trial: &[usize], primes: &Vec<bool>) {
+    if trial.len()==5 { 
+        return;
+    }
+
     let start = trial[trial.len() - 1] + 1;
-    let max = primes.len();
-    
-    for i in start..max {
+
+    for i in start..2000 {
         if !primes[i] {
             continue;
         }
-        let mut trial2 = trial.clone();
-        trial2.push(i);
-        
-        if concat(trial2[trial2.len()-1], trial2[trial2.len()-2]) >= primes.len() { 
+        let mut trial2: [usize; 5] = [0, 0, 0, 0, 0];
+        for i in 0..trial.len() {
+            trial2[i] = trial[i];
+        }
+        trial2[trial.len()] = i;
+        let n = trial.len() + 1;
+
+        if concat(trial2[n - 1], trial2[n - 2]) >= primes.len() {
             break;
         }
-        let flag = test(&trial2, &primes);
+        let flag = test_trial_vector(&trial2[0..n], &primes);
         if flag {
             println!("found ");
             for i in trial2 {
                 print!(" {} ", i)
             }
+            explore(&trial2, primes);
         }
     }
 }
 
 fn main() {
     let n = 100000000;
-    let mut data = Vec::with_capacity(n);
-    data.resize(n, true);
+    let mut primes = Vec::with_capacity(n);
+    primes.resize(n, true);
 
-    init_primes(&mut data);
+    init_primes(&mut primes);
 
-    let trial = vec![3, 7, 109, 673];
-    explore( &trial, &data);
-
-    // for i in 3..data.len() - 1 {
-    //     if data[i] {
-    //         let trial = vec![i];
-    //         explore(&trial, &data);
-    //     }
-    // }
+    for i in 3..1000 {
+        if !primes[i] { 
+            continue;
+        }
+        let trial: [usize; 2] = [i, i + 1];
+        explore(&trial[0..2], &primes);
+    }
 }
 
 #[cfg(test)]
@@ -113,10 +123,10 @@ mod tests {
         data.resize(n, true);
         init_primes(&mut data);
         let trial = vec![3, 7, 109, 673];
-        assert_eq!(test(&trial, &data), true);
+        assert_eq!(test_trial_vector(&trial, &data), true);
 
         let trial2 = vec![3, 7, 11, 673];
-        assert_eq!(test(&trial2, &data), false);
+        assert_eq!(test_trial_vector(&trial2, &data), false);
     }
 
     #[test]
@@ -126,6 +136,6 @@ mod tests {
         data.resize(n, true);
         init_primes(&mut data);
         let trial = vec![3, 7];
-        assert_eq!(test(&trial, &data), true);
+        assert_eq!(test_trial_vector(&trial, &data), true);
     }
 }
