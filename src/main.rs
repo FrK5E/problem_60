@@ -44,13 +44,9 @@ pub fn clone_with_extra<T: Clone>(x: &[T], y: &T) -> Vec<T> {
 }
 
 fn explore(trial: &[usize], primes: &Vec<bool>) {
-    if trial.len()==5 { 
-        return;
-    }
-
     let start = trial[trial.len() - 1] + 1;
 
-    for i in start..2000 {
+    for i in start..100000 {
         if !primes[i] {
             continue;
         }
@@ -66,28 +62,41 @@ fn explore(trial: &[usize], primes: &Vec<bool>) {
         }
         let flag = test_trial_vector(&trial2[0..n], &primes);
         if flag {
-            println!("found ");
-            for i in trial2 {
-                print!(" {} ", i)
+            if n == 4 {
+                println!(
+                    "found 4: {} {} {} {} ",
+                    trial2[0], trial2[1], trial2[2], trial2[3]
+                );
             }
-            explore(&trial2, primes);
+            if n == 5 {
+                println!(
+                    "found 5: {} {} {} {} {}",
+                    trial2[0], trial2[1], trial2[2], trial2[3], trial2[4]
+                );
+                let sum: usize = trial2[0..n].iter().sum();
+                println!( "the answer is: {}", sum);
+                assert!(false);
+            }
+            explore(&trial2[0..n], primes);
         }
     }
 }
 
 fn main() {
-    let n = 100000000;
+    let n = 1000000000;
     let mut primes = Vec::with_capacity(n);
     primes.resize(n, true);
 
     init_primes(&mut primes);
 
-    for i in 3..1000 {
-        if !primes[i] { 
+    println!( "I have the primes ready...");
+
+    for i in 3..10000 {
+        if !primes[i] {
             continue;
         }
-        let trial: [usize; 2] = [i, i + 1];
-        explore(&trial[0..2], &primes);
+        let trial: [usize; 1] = [i];
+        explore(&trial, &primes);
     }
 }
 
